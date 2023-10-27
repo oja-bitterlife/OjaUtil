@@ -1,6 +1,6 @@
 import bpy
 
-# コレクション
+# アウトライナのコレクションを全部Enableに
 class EnableHierarchy(bpy.types.Operator):
     bl_idname = "ojautil.outliner_enablehierarchy"
     bl_label = "Enable Hierarchy"
@@ -20,6 +20,7 @@ class EnableHierarchy(bpy.types.Operator):
 
         return {'FINISHED'}
 
+    # 入力レイヤーコレクションがコレクション名リストにあれば有効化する。子を再帰
     @classmethod
     def rec_check(cls, context, layer_collection, collection_names):
         if layer_collection.name in collection_names:  # 選択コレクションリストに含まれていれば
