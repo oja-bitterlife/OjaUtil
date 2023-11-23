@@ -1,8 +1,9 @@
 [完了]・コレクションを全部ONするボタン
 [完了]・AOVMuteの機能統合
 [完了]・選択ImageTextureのカラーモードを変更するボタン
+[完了]・ComPILのノードコピー機能を移動
 
-・ComPILのノードコピー機能を移動
+
 ・全てのLayerのポーズをリセットするボタン
 ・FCurveCopy機能をBoneだけからObjectもに拡張(モードで判定できそう)
 ・ATHから移動、ATHの整理
