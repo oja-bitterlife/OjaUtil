@@ -18,6 +18,7 @@ class AOV_MUTE_PT_render_ui(bpy.types.Panel):
         box = self.layout.box()
         # UseNodes ON/OFF
         box.prop(context.scene, 'use_nodes', text="Use Composit")
+
         row = box.row()
         # UseSimplify ON/OFF
         row.prop(context.scene.render, 'use_simplify', text="Simplify")

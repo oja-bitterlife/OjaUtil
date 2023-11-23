@@ -1,6 +1,7 @@
 [完了]・コレクションを全部ONするボタン
+[完了]・AOVMuteの機能統合
 
+・選択ImageTextureのカラーモードを変更するボタン
 ・全てのLayerのポーズをリセットするボタン
-・AOVMuteの機能統合
 ・FCurveCopy機能をBoneだけからObjectもに拡張(モードで判定できそう)
 ・ATHから移動、ATHの整理
