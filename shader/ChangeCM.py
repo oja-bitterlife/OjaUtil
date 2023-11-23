@@ -7,8 +7,7 @@ class SetSRGB(bpy.types.Operator):
     bl_label = "sRGB"
 
     def execute(self, context):
-        select_node_list = context.selected_nodes
-        for node in select_node_list:
+        for node in context.selected_nodes:
             if node.type == "TEX_IMAGE":
                 node.image.colorspace_settings.name = "sRGB"
 
@@ -19,8 +18,7 @@ class SetNonColor(bpy.types.Operator):
     bl_label = "Non-Color"
 
     def execute(self, context):
-        select_node_list = context.selected_nodes
-        for node in select_node_list:
+        for node in context.selected_nodes:
             if node.type == "TEX_IMAGE":
                 node.image.colorspace_settings.name = "Non-Color"
 
