@@ -6,27 +6,36 @@ from .aovmute import AOVMute
 # AOVの状況UI
 # ===========================================================================================
 # 3DView Tools Panel
+class AOV_MUTE_PT_render_ui(bpy.types.Panel):
+    bl_idname = "AOV_MUTE_PT_RENDER_UI"
+    bl_label = "Fast Rendering"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = UI_Setting.UI_CATEGORY
+    bl_order = UI_Setting.UI_ORDER.FAST_RENDERING.value
+
+    def draw(self, context):
+        box = self.layout.box()
+        # UseNodes ON/OFF
+        box.prop(context.scene, 'use_nodes', text="Use Composit")
+        row = box.row()
+        # UseSimplify ON/OFF
+        row.prop(context.scene.render, 'use_simplify', text="Simplify")
+        # UseSingleLayer ON/OFF
+        row.prop(context.scene.render, 'use_single_layer', text="Single Layer")
+
+
+# 3DView Tools Panel
 class AOV_MUTE_PT_ui(bpy.types.Panel):
     bl_idname = "AOV_MUTE_PT_UI"
     bl_label = "AOV Mute"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = UI_Setting.UI_CATEGORY
-    bl_options = {'DEFAULT_CLOSED'}  # 寄生ベースなので閉じておく
+    bl_options = {'DEFAULT_CLOSED'}
+    bl_order = UI_Setting.UI_ORDER.AOV_MUTE.value
 
     def draw(self, context):
-        self.layout.label(text="Fast Rendering")
-        box = self.layout.box()
-        row = box.row()
-        # UseNodes ON/OFF
-        row.prop(context.scene, 'use_nodes', text="Use Composit")
-        # UseSimplify ON/OFF
-        row.prop(context.scene.render, 'use_simplify', text="Use Simplify")
-        # UseSingleLayer ON/OFF
-        box.prop(context.scene.render, 'use_single_layer', text="Use Single Layer")
-
-        # AOVMute
-        self.layout.label(text="AOVMute")
         row = self.layout.row()
         row.operator("aov_mute.show")
         row.operator("aov_mute.mute")
