@@ -1,4 +1,5 @@
 import bpy
+from . import UI_Setting
 from .outliner import EnableHierarchy, CloseAll
 
 # Main UI

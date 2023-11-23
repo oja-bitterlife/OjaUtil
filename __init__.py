@@ -15,8 +15,8 @@ bl_info = {
     "name" : "OjaUtil",
     "author" : "oja",
     "description" : "",
-    "blender" : (3, 6, 5),
-    "version" : (0, 0, 1),
+    "blender" : (4, 0, 0),
+    "version" : (0, 1, 0),
     "location" : "",
     "warning" : "",
     "category" : "Generic"
