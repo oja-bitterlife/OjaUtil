@@ -1,10 +1,17 @@
 import bpy
 
+# 選択中のイメージテクスチャノードのカラースペースをまとめて変更する
+
 class SetSRGB(bpy.types.Operator):
     bl_idname = "ojautil.set_srgb"
     bl_label = "sRGB"
 
     def execute(self, context):
+        select_node_list = context.selected_nodes
+        for node in select_node_list:
+            if node.type == "TEX_IMAGE":
+                node.image.colorspace_settings.name = "sRGB"
+
         return{'FINISHED'}
 
 class SetNonColor(bpy.types.Operator):
@@ -12,6 +19,11 @@ class SetNonColor(bpy.types.Operator):
     bl_label = "Non-Color"
 
     def execute(self, context):
+        select_node_list = context.selected_nodes
+        for node in select_node_list:
+            if node.type == "TEX_IMAGE":
+                node.image.colorspace_settings.name = "Non-Color"
+
         return{'FINISHED'}
 
 
