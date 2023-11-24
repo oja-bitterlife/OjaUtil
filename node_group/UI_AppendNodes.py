@@ -5,6 +5,8 @@ TARGET_NODE_GROUPS = [
     # Material
     "OjaNPR2023.10",
     "OjaSpec2023.10",
+    # World
+    "OjaWorldSpace2023.11",
     # GeometryNodes
     "OjaGN_Billboard_ZRot",
     "OjaGN_AutoSmooth",
