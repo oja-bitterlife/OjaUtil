@@ -12,7 +12,7 @@ class AOV_MUTE_PT_render_ui(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = UI_Setting.UI_CATEGORY
-    bl_order = UI_Setting.UI_ORDER.FAST_RENDERING.value
+    bl_order = UI_Setting.UI_ORDER_3DVIEW.FAST_RENDERING.value
 
     def draw(self, context):
         box = self.layout.box()
@@ -34,7 +34,7 @@ class AOV_MUTE_PT_ui(bpy.types.Panel):
     bl_region_type = "UI"
     bl_category = UI_Setting.UI_CATEGORY
     bl_options = {'DEFAULT_CLOSED'}
-    bl_order = UI_Setting.UI_ORDER.AOV_MUTE.value
+    bl_order = UI_Setting.UI_ORDER_3DVIEW.AOV_MUTE.value
 
     def draw(self, context):
         row = self.layout.row()

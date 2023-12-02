@@ -24,6 +24,7 @@ class COMPOSIT_PIL_PT_view_ui(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = UI_Setting.UI_CATEGORY
+    bl_order = UI_Setting.UI_ORDER_3DVIEW.NODE_GROUP.value
 
     def draw(self, context):
         self.layout.operator("ojautil.append_nodegroups")

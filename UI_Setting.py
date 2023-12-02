@@ -2,9 +2,10 @@ from enum import Enum, auto
 
 UI_CATEGORY = "OjaUtil"  # アドオンのカテゴリ
 
-class UI_ORDER(Enum):
+class UI_ORDER_3DVIEW(Enum):
     FAST_RENDERING = auto()
     AOV_MUTE = auto()
+    NODE_GROUP = auto()
 
 
 # NodeTreeの画面確認
