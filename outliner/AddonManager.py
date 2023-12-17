@@ -58,7 +58,7 @@ def load_addon_status(layer_collection, from_mod_names, from_addon_names):
 
                 # 有効になっているか
                 addon_enabled, addon_loaded = addon_utils.check(mod.__name__)
-                obj.hide_set(not addon_enabled)
+                obj.hide_set(not (addon_enabled and addon_loaded))
             else:
                 obj.hide_render = True
                 obj.hide_set(True)
@@ -107,12 +107,12 @@ def save_addon_status(layer_collection, from_mod_names, from_addon_names):
                 outliner_enabled = not obj.hide_get()
                 addon_enabled, addon_loaded = addon_utils.check(mod.__name__)
 
-                if outliner_enabled != addon_enabled:
+                if outliner_enabled != (addon_enabled and addon_loaded):
                     if outliner_enabled:
-                        addon_utils.enable(mod.__name__)
+                        addon_utils.enable(mod.__name__, default_set=True)
                         print("enable: " + mod.__name__)
                     else:
-                        addon_utils.disable(mod.__name__)
+                        addon_utils.disable(mod.__name__, default_set=True)
                         print("disable: " + mod.__name__)
             else:
                 obj.hide_render = True  # インストールされてなかったことを通知
