@@ -18,18 +18,6 @@ class OjaUtil_PT_nodegroup_ui(bpy.types.Panel):
         self.layout.operator("ojautil.append_nodegroups")
 
 
-class COMPOSIT_PIL_PT_view_ui(bpy.types.Panel):
-    bl_idname = "OJAUTIL_PT_3DVIEW_UI"
-    bl_label = APPEND_NODE_LABEL
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = UI_Setting.UI_CATEGORY
-    bl_order = UI_Setting.UI_ORDER_3DVIEW.NODE_GROUP.value
-
-    def draw(self, context):
-        self.layout.operator("ojautil.append_nodegroups")
-
-
 # register/unregister
 # *****************************************************************************
 modules = [
