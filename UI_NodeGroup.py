@@ -1,6 +1,6 @@
 import bpy
 from . import UI_Setting
-from .node_group import UI_AppendNodes
+from .node_group import AppendNodes
 
 APPEND_NODE_LABEL = "NodeGroupUtil"
 
@@ -21,7 +21,7 @@ class OjaUtil_PT_nodegroup_ui(bpy.types.Panel):
 # register/unregister
 # *****************************************************************************
 modules = [
-    UI_AppendNodes,
+    AppendNodes,
 ]
 
 def register():
