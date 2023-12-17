@@ -166,6 +166,9 @@ class AOV_MUTE_OT_sync(bpy.types.Operator):
 
 # =================================================================================================
 classes = [
+    AOV_MUTE_OT_show,
+    AOV_MUTE_OT_reload,
+    AOV_MUTE_OT_sync,
 ]
 
 def register():
