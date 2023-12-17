@@ -109,10 +109,10 @@ def save_addon_status(layer_collection, from_mod_names, from_addon_names):
 
                 if outliner_enabled != (addon_enabled and addon_loaded):
                     if outliner_enabled:
-                        addon_utils.enable(mod.__name__, default_set=True)
+                        bpy.ops.preferences.addon_enable(module=mod.__name__)
                         print("enable: " + mod.__name__)
                     else:
-                        addon_utils.disable(mod.__name__, default_set=True)
+                        bpy.ops.preferences.addon_disable(module=mod.__name__)
                         print("disable: " + mod.__name__)
             else:
                 obj.hide_render = True  # インストールされてなかったことを通知
