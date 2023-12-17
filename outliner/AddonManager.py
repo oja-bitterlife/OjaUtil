@@ -14,7 +14,6 @@ class LoadStatus(bpy.types.Operator):
 
         # アドオン情報
         from_mod_names = {mod.__name__:mod for mod in addon_utils.modules()}  # モジュール名ベース
-        print(from_mod_names.keys())
         from_addon_names = {mod.bl_info["name"]:mod for mod in addon_utils.modules()}  # アドオン名ベース
 
         # オブジェクトに情報を反映させる
@@ -34,25 +33,30 @@ def get_layer_collection(layer_collection, target_name):
     return None
 
 def load_addon_status(layer_collection, from_mod_names, from_addon_names):
-    # オブジェクトを処理
-    for obj in layer_collection.collection.objects:
-        # インストールされているか
-        if obj.name in from_mod_names or obj.name in from_addon_names:
-            obj.hide_render = False
+    # コレクションが有効かチェック
+    if layer_collection.exclude == False:
+        # オブジェクトを処理
+        for obj in layer_collection.collection.objects:
+            # インストールされているか(モジュール名優先)
+            if obj.name in from_mod_names or obj.name in from_addon_names:
+                obj.hide_render = False
 
-            # 引っかかった名前でモジュール取得
-            if obj.name in from_mod_names:
-                mod = from_mod_names[obj.name]
+                # 引っかかった名前でモジュール取得
+                if obj.name in from_mod_names:  # 優先
+                    mod = from_mod_names[obj.name]
+                else:
+                    mod = from_addon_names[obj.name]
+
+                # 有効になっているか
+                addon_enabled, addon_loaded = addon_utils.check(mod.__name__)
+                obj.hide_set(not addon_enabled)
             else:
-                mod = from_addon_names[obj.name]
+                obj.hide_render = True
+                obj.hide_set(True)
 
-            # 有効になっているか
-            addon_enabled, addon_loaded = addon_utils.check(mod.__name__)
-            obj.hide_set(not addon_enabled)
-        else:
-            obj.hide_render = True
-            obj.hide_set(True)
-
+    # コレクションの有効/無効関係なくツリーはたぐる
+    for child in layer_collection.children:
+        load_addon_status(child, from_mod_names, from_addon_names)
 
 
 class SaveStatus(bpy.types.Operator):
