@@ -20,17 +20,17 @@ class GN_REMOVE_OT_reload(bpy.types.Operator):
         objects = [obj for obj in context.selected_objects]
 
         # 使われているGeometryNodesを回収する
-        geonodes_list = {}
+        nodegroup_list = set([])
         for obj in objects:
             for mod in obj.modifiers:
                 if mod.type == "NODES":
-                    geonodes_list[mod.name] = mod
+                    nodegroup_list.add(mod.node_group.name)
 
         # リストを更新する
         context.scene.geonodes_list.clear()
-        for geonodes_name in geonodes_list.keys():
+        for nodegroup_name in sorted(nodegroup_list):
             item = context.scene.geonodes_list.add()
-            item.name = geonodes_name
+            item.name = nodegroup_name
 
 
 # 削除ボタン
@@ -46,8 +46,11 @@ class GN_REMOVE_OT_remove(bpy.types.Operator):
 
     # 同期
     def remove(self, context):
+        # 選択中のGeoNodes名を取得
         index = context.scene.geonodes_list_index
-        select_geonodes_name = context.scene.geonodes_list[index].name
+        if index < 0 or index >= len(context.scene.geonodes_list):  # indexの範囲チェック
+            return
+        select_nodegroup_name = context.scene.geonodes_list[index].name
 
         # 選択中のオブジェクトが対象
         objects = [obj for obj in context.selected_objects]
@@ -55,7 +58,7 @@ class GN_REMOVE_OT_remove(bpy.types.Operator):
         # 指定したGeoNodesなら削除する
         for obj in objects:
             for mod in obj.modifiers:
-                if mod.type == "NODES" and mod.name == select_geonodes_name:
+                if mod.type == "NODES" and mod.node_group.name == select_nodegroup_name:
                     obj.modifiers.remove(mod)
 
         # リストも削除しておく
