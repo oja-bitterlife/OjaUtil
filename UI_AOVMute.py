@@ -67,8 +67,6 @@ class AOV_MUTE_UL_aov_list(bpy.types.UIList):
 # =================================================================================================
 class AOVItem(bpy.types.PropertyGroup):
     name:  bpy.props.StringProperty()
-    mute:  bpy.props.BoolProperty()
-    type:  bpy.props.StringProperty()
 
 modules = [
     AOVMute,

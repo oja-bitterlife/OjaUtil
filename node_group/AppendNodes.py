@@ -3,7 +3,7 @@ import os.path
 
 TARGET_NODE_GROUPS = [
     # Material
-    "OjaNPR2024.1",
+    "OjaNPR2024.3",
     "OjaSpec2023.10",
     # World
     "OjaWorldSpace2023.11",

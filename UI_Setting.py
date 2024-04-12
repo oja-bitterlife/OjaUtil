@@ -5,6 +5,7 @@ UI_CATEGORY = "OjaUtil"  # アドオンのカテゴリ
 class UI_ORDER_3DVIEW(Enum):
     FAST_RENDERING = auto()
     AOV_MUTE = auto()
+    GN_REMOVE = auto()
     NODE_GROUP = auto()
 
 
