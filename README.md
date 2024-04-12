@@ -11,3 +11,4 @@
 - Outlinerを一気に閉じたり、選択したCollection階層以下の全てのCollectionを有効にする
 - Materialの選択中のImageTextureのColorSpaceに、srgb/non-colorを一括で設定する
 - Material/Compositingでよく使うNodeGroupを追加する
+- 選択中のオブジェクトから指定したGeometryNodesを一括削除
