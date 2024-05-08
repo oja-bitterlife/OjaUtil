@@ -6,27 +6,6 @@ from .aovmute import AOVMute
 # AOVの状況UI
 # ===========================================================================================
 # 3DView Tools Panel
-class AOV_MUTE_PT_render_ui(bpy.types.Panel):
-    bl_idname = "AOV_MUTE_PT_RENDER_UI"
-    bl_label = "Fast Rendering"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = UI_Setting.UI_CATEGORY
-    bl_order = UI_Setting.UI_ORDER_3DVIEW.FAST_RENDERING.value
-
-    def draw(self, context):
-        box = self.layout.box()
-        # UseNodes ON/OFF
-        box.prop(context.scene, 'use_nodes', text="Use Composit")
-
-        row = box.row()
-        # UseSimplify ON/OFF
-        row.prop(context.scene.render, 'use_simplify', text="Simplify")
-        # UseSingleLayer ON/OFF
-        row.prop(context.scene.render, 'use_single_layer', text="Single Layer")
-
-
-# 3DView Tools Panel
 class AOV_MUTE_PT_ui(bpy.types.Panel):
     bl_idname = "AOV_MUTE_PT_UI"
     bl_label = "AOV Mute"
