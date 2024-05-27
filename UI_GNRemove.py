@@ -8,7 +8,7 @@ from .gn_remove import GNRemove
 # 3DView Tools Panel
 class GN_REMOVE_PT_ui(bpy.types.Panel):
     bl_idname = "GN_REMOVE_PT_UI"
-    bl_label = "GNRemove"
+    bl_label = "GeoNodes Remove"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = UI_Setting.UI_CATEGORY
