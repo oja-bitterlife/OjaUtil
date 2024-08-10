@@ -3,14 +3,14 @@ import os.path
 
 TARGET_NODE_GROUPS = [
     # Material
-    "OjaNPR2024.3",
+    "OjaNPR2024.8",
     "OjaSpec2023.10",
     # World
     "OjaWorldSpace2023.11",
     # GeometryNodes
     "OjaGN_Billboard_ZRot",
-    "OjaGN_AutoSmooth",
     "OjaGN_GostBlur2023.11",
+    "OjaGetLightVec",
     # Compositing
     "OjaCOMPIL_Normal",
 ]
