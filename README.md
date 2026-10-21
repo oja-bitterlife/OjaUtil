@@ -12,3 +12,4 @@
 - Materialの選択中のImageTextureのColorSpaceに、srgb/non-colorを一括で設定する
 - Material/Compositingでよく使うNodeGroupを追加する
 - 選択中のオブジェクトから指定したGeometryNodesを一括削除
+- 編集中のCurveオブジェクトの各ポイントに一括でキーを打つ
