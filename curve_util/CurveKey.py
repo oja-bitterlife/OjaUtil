@@ -1,6 +1,10 @@
 import bpy
 
-# 編集中の(選択中の)Curveのポイント(ベジェはハンドル含む)にキーを打つ
+# 編集中の(選択中の)Curveのポイント(ベジェはハンドル含む、tilt/radiusも)にキーを打つ
+
+# キーを打つプロパティ
+BEZIER_PROPS = ("co", "handle_left", "handle_right", "tilt", "radius")
+POINT_PROPS = ("co", "tilt", "radius")
 
 # 編集モード中のCurveを取得(マルチオブジェクト編集対応)
 def get_edit_curves(context):
@@ -22,14 +26,15 @@ def key_points(context, selected_only):
                 for point in spline.bezier_points:
                     if selected_only and not (point.select_control_point or point.select_left_handle or point.select_right_handle):
                         continue
-                    for prop in ("co", "handle_left", "handle_right"):
+                    for prop in BEZIER_PROPS:
                         point.keyframe_insert(prop, frame=frame)
                     count += 1
             else:  # NURBS / Poly
                 for point in spline.points:
                     if selected_only and not point.select:
                         continue
-                    point.keyframe_insert("co", frame=frame)
+                    for prop in POINT_PROPS:
+                        point.keyframe_insert(prop, frame=frame)
                     count += 1
     return count
 
