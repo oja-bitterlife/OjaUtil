@@ -1,4 +1,6 @@
 import bpy
+import re
+from bpy_extras import anim_utils
 
 # 編集中の(選択中の)Curveのポイント(ベジェはハンドル含む、tilt/radiusも)にキーを打つ
 
@@ -15,6 +17,44 @@ def get_edit_curves(context):
 # Curveの編集モードのみ有効
 def is_curve_edit(context):
     return len(get_edit_curves(context)) > 0
+
+# チャンネルをポイントごとにグループ化する
+# *****************************************************************************
+POINT_PATH_RE = re.compile(r'^splines\[(\d+)\]\.(?:bezier_points|points)\[(\d+)\]\.')
+
+def point_group_name(spline_index, point_index):
+    return f"S{spline_index} P{point_index}"
+
+def get_channelbag(id_data):
+    ad = id_data.animation_data
+    if ad is None or ad.action is None or ad.action_slot is None:
+        return None
+    return anim_utils.action_get_channelbag_for_slot(ad.action, ad.action_slot)
+
+def group_point_channels(obj):
+    cb = get_channelbag(obj.data)
+    if cb is None:
+        return
+    targets = []
+    for fc in cb.fcurves:
+        m = POINT_PATH_RE.match(fc.data_path)
+        if m:
+            targets.append((fc.data_path, fc.array_index, (int(m[1]), int(m[2]))))
+
+    # グループを番号順に先に全部作る(作成後はFCurveを取り直す必要がある)
+    for key in sorted({t[2] for t in targets}):
+        name = point_group_name(*key)
+        if cb.groups.get(name) is None:
+            group = cb.groups.new(name)
+            group.show_expanded = False
+            group.show_expanded_graph = False
+
+    for data_path, index, key in targets:
+        name = point_group_name(*key)
+        fc = cb.fcurves.find(data_path, index=index)
+        if fc is not None and (fc.group is None or fc.group.name != name):
+            fc.group = cb.groups[name]
+
 
 # ポイントにキーを打つ(selected_only=Trueなら選択中のみ)
 def key_points(context, selected_only):
@@ -36,6 +76,7 @@ def key_points(context, selected_only):
                     for prop in POINT_PROPS:
                         point.keyframe_insert(prop, frame=frame)
                     count += 1
+        group_point_channels(obj)
     return count
 
 

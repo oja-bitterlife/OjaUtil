@@ -1,6 +1,6 @@
 import bpy
 from . import UI_Setting
-from .curve_util import CurveKey, CurveMirror
+from .curve_util import CurveKey, CurveChannel, CurveMirror
 
 
 # Main UI
@@ -18,6 +18,7 @@ class OjaUtil_PT_CurveUtil_ui(bpy.types.Panel):
         col = self.layout.column(align=True)
         col.operator("ojautil.curve_key_all_points", icon='KEY_HLT')
         col.operator("ojautil.curve_key_selected_points", icon='KEY_HLT')
+        col.operator("ojautil.curve_focus_selected_channels", icon='VIEWZOOM')
 
         self.layout.operator("ojautil.curve_apply_mirror_x", icon='MOD_MIRROR')
 
@@ -26,6 +27,7 @@ class OjaUtil_PT_CurveUtil_ui(bpy.types.Panel):
 # *****************************************************************************
 modules = [
     CurveKey,
+    CurveChannel,
     CurveMirror,
 ]
 
