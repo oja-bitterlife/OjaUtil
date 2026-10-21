@@ -13,3 +13,4 @@
 - Material/Compositingでよく使うNodeGroupを追加する
 - 選択中のオブジェクトから指定したGeometryNodesを一括削除
 - 編集中のCurveオブジェクトの各ポイントに一括でキーを打つ
+- アクティブなCurveオブジェクトのX軸Mirrorを適用する(tiltは反転)

@@ -7,7 +7,7 @@ class UI_ORDER_3DVIEW(Enum):
     AOV_MUTE = auto()
     GN_REMOVE = auto()
     NODE_GROUP = auto()
-    CURVE_KEY = auto()
+    CURVE_UTIL = auto()
 
 
 # NodeTreeの画面確認
