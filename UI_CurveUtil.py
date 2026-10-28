@@ -16,7 +16,6 @@ class OjaUtil_PT_CurveUtil_ui(bpy.types.Panel):
 
     def draw(self, context):
         col = self.layout.column(align=True)
-        col.operator("ojautil.curve_key_all_points", icon='KEY_HLT')
         col.operator("ojautil.curve_key_selected_points", icon='KEY_HLT')
         col.operator("ojautil.curve_delete_key_selected_points", icon='KEY_DEHLT')
         col.operator("ojautil.curve_focus_selected_channels", icon='VIEWZOOM')
