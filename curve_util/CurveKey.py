@@ -138,7 +138,7 @@ def delete_selected_point_keys(context):
 
 class OjaUtil_OT_CurveKeyAllPoints(bpy.types.Operator):
     bl_idname = "ojautil.curve_key_all_points"
-    bl_label = "Key All Points"
+    bl_label = "Add Key All Points"
     bl_description = "編集中の全Curveの全ポイントにキーを打つ"
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -154,7 +154,7 @@ class OjaUtil_OT_CurveKeyAllPoints(bpy.types.Operator):
 
 class OjaUtil_OT_CurveKeySelectedPoints(bpy.types.Operator):
     bl_idname = "ojautil.curve_key_selected_points"
-    bl_label = "Key Selected Points"
+    bl_label = "Add Key Selected Points"
     bl_description = "編集中の全Curveの選択中のポイントにキーを打つ"
     bl_options = {'REGISTER', 'UNDO'}
 
