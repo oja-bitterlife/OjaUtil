@@ -80,6 +80,62 @@ def key_points(context, selected_only):
     return count
 
 
+# 選択中のポイントのデータパスの先頭を集める
+def get_selected_point_paths(obj):
+    paths = []
+    for si, spline in enumerate(obj.data.splines):
+        if spline.type == 'BEZIER':
+            for pi, point in enumerate(spline.bezier_points):
+                if point.select_control_point or point.select_left_handle or point.select_right_handle:
+                    paths.append(f"splines[{si}].bezier_points[{pi}].")
+        else:
+            for pi, point in enumerate(spline.points):
+                if point.select:
+                    paths.append(f"splines[{si}].points[{pi}].")
+    return paths
+
+# 選択中のポイントの現在フレームのキーを削除する(空になったチャンネルとグループも削除)
+def delete_selected_point_keys(context):
+    frame = context.scene.frame_current
+    count = 0
+    for obj in get_edit_curves(context):
+        cb = get_channelbag(obj.data)
+        if cb is None:
+            continue
+        prefixes = tuple(get_selected_point_paths(obj))
+        if not prefixes:
+            continue
+
+        deleted_points = set()
+        empty_fcurves = []
+        for fc in cb.fcurves:
+            if not fc.data_path.startswith(prefixes):
+                continue
+            for key in reversed(fc.keyframe_points):
+                if abs(key.co.x - frame) < 0.001:
+                    fc.keyframe_points.remove(key, fast=True)
+                    deleted_points.add(fc.data_path.rsplit(".", 1)[0])
+            if len(fc.keyframe_points) == 0:
+                empty_fcurves.append((fc.data_path, fc.array_index))
+            else:
+                fc.update()
+
+        # 空になったチャンネルを削除(削除後はFCurveを取り直す必要がある)
+        for data_path, index in empty_fcurves:
+            fc = cb.fcurves.find(data_path, index=index)
+            if fc is not None:
+                cb.fcurves.remove(fc)
+
+        # 空になったグループを削除
+        for name in [g.name for g in cb.groups if len(g.channels) == 0]:
+            group = cb.groups.get(name)
+            if group is not None:
+                cb.groups.remove(group)
+
+        count += len(deleted_points)
+    return count
+
+
 class OjaUtil_OT_CurveKeyAllPoints(bpy.types.Operator):
     bl_idname = "ojautil.curve_key_all_points"
     bl_label = "Key All Points"
@@ -115,9 +171,29 @@ class OjaUtil_OT_CurveKeySelectedPoints(bpy.types.Operator):
         return{'FINISHED'}
 
 
+class OjaUtil_OT_CurveDeleteKeySelectedPoints(bpy.types.Operator):
+    bl_idname = "ojautil.curve_delete_key_selected_points"
+    bl_label = "Delete Key Selected Points"
+    bl_description = "編集中の全Curveの選択中のポイントから、現在フレームのキーを削除する"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return is_curve_edit(context)
+
+    def execute(self, context):
+        count = delete_selected_point_keys(context)
+        if count == 0:
+            self.report({'WARNING'}, "No keys to delete")
+            return{'CANCELLED'}
+        self.report({'INFO'}, f"Deleted keys of {count} points")
+        return{'FINISHED'}
+
+
 classes = [
     OjaUtil_OT_CurveKeyAllPoints,
     OjaUtil_OT_CurveKeySelectedPoints,
+    OjaUtil_OT_CurveDeleteKeySelectedPoints,
 ]
 
 def register():
