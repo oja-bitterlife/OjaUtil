@@ -1,6 +1,6 @@
 import bpy
 from . import UI_Setting
-from .curve_util import CurveKey, CurveChannel, CurveMirror
+from .curve_util import CurveKey, CurveChannel, CurveMirror, CurveCopy
 
 
 # Main UI
@@ -21,7 +21,9 @@ class OjaUtil_PT_CurveUtil_ui(bpy.types.Panel):
         col.operator("ojautil.curve_delete_key_selected_points", icon='KEY_DEHLT')
         col.operator("ojautil.curve_focus_selected_channels", icon='VIEWZOOM')
 
-        self.layout.operator("ojautil.curve_apply_mirror_x", icon='MOD_MIRROR')
+        col = self.layout.column(align=True)
+        col.operator("ojautil.curve_apply_mirror_x", icon='MOD_MIRROR')
+        col.operator("ojautil.curve_copy_points_from_active", icon='PASTEDOWN')
 
 
 # register/unregister
@@ -30,6 +32,7 @@ modules = [
     CurveKey,
     CurveChannel,
     CurveMirror,
+    CurveCopy,
 ]
 
 def register():
