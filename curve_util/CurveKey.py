@@ -56,22 +56,22 @@ def group_point_channels(obj):
             fc.group = cb.groups[name]
 
 
-# 選択中のポイントにキーを打つ
-def key_selected_points(context):
+# ポイントにキーを打つ(selected_only=Trueなら選択中のみ)
+def key_points(context, objects, selected_only):
     frame = context.scene.frame_current
     count = 0
-    for obj in get_edit_curves(context):
+    for obj in objects:
         for spline in obj.data.splines:
             if spline.type == 'BEZIER':
                 for point in spline.bezier_points:
-                    if not (point.select_control_point or point.select_left_handle or point.select_right_handle):
+                    if selected_only and not (point.select_control_point or point.select_left_handle or point.select_right_handle):
                         continue
                     for prop in BEZIER_PROPS:
                         point.keyframe_insert(prop, frame=frame)
                     count += 1
             else:  # NURBS / Poly
                 for point in spline.points:
-                    if not point.select:
+                    if selected_only and not point.select:
                         continue
                     for prop in POINT_PROPS:
                         point.keyframe_insert(prop, frame=frame)
@@ -136,6 +136,31 @@ def delete_selected_point_keys(context):
     return count
 
 
+# 全ポイントキーの対象Curve(編集モード:編集中のCurve / オブジェクトモード:選択中のCurve)
+def get_all_points_target_curves(context):
+    if context.mode == 'EDIT_CURVE':
+        return get_edit_curves(context)
+    if context.mode == 'OBJECT':
+        return [obj for obj in context.selected_objects if obj.type == 'CURVE']
+    return []
+
+
+class OjaUtil_OT_CurveKeyAllPoints(bpy.types.Operator):
+    bl_idname = "ojautil.curve_key_all_points"
+    bl_label = "Add Key All Points"
+    bl_description = "編集中(オブジェクトモードでは選択中)の全Curveの全ポイントにキーを打つ"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return len(get_all_points_target_curves(context)) > 0
+
+    def execute(self, context):
+        count = key_points(context, get_all_points_target_curves(context), selected_only=False)
+        self.report({'INFO'}, f"Keyed {count} points")
+        return{'FINISHED'}
+
+
 class OjaUtil_OT_CurveKeySelectedPoints(bpy.types.Operator):
     bl_idname = "ojautil.curve_key_selected_points"
     bl_label = "Add Key Selected Points"
@@ -147,7 +172,7 @@ class OjaUtil_OT_CurveKeySelectedPoints(bpy.types.Operator):
         return is_curve_edit(context)
 
     def execute(self, context):
-        count = key_selected_points(context)
+        count = key_points(context, get_edit_curves(context), selected_only=True)
         if count == 0:
             self.report({'WARNING'}, "No points selected")
             return{'CANCELLED'}
@@ -175,6 +200,7 @@ class OjaUtil_OT_CurveDeleteKeySelectedPoints(bpy.types.Operator):
 
 
 classes = [
+    OjaUtil_OT_CurveKeyAllPoints,
     OjaUtil_OT_CurveKeySelectedPoints,
     OjaUtil_OT_CurveDeleteKeySelectedPoints,
 ]
