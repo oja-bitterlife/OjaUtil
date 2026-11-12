@@ -1,24 +1,13 @@
 import bpy
 import re
-from .CurveKey import get_edit_curves, is_curve_edit, group_point_channels, get_channelbag, point_group_name, POINT_PATH_RE
+from .CurveData import (
+    get_edit_objects, is_edit, get_channelbag, group_point_channels,
+    point_group_name, parse_point_path, make_lookup, get_selected_points,
+)
 
-# 選択中のポイントのチャンネルだけを展開・選択して見つけやすくする
+# 選択中のポイントのチャンネルだけを展開・選択して見つけやすくする(Curve / Curves)
 
 GROUP_NAME_RE = re.compile(r'^S\d+ P\d+$')
-
-# 選択中のポイントのグループ名を集める
-def get_selected_point_names(obj):
-    names = set()
-    for si, spline in enumerate(obj.data.splines):
-        if spline.type == 'BEZIER':
-            for pi, point in enumerate(spline.bezier_points):
-                if point.select_control_point or point.select_left_handle or point.select_right_handle:
-                    names.add(point_group_name(si, pi))
-        else:
-            for pi, point in enumerate(spline.points):
-                if point.select:
-                    names.add(point_group_name(si, pi))
-    return names
 
 
 class OjaUtil_OT_CurveFocusSelectedChannels(bpy.types.Operator):
@@ -29,16 +18,16 @@ class OjaUtil_OT_CurveFocusSelectedChannels(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return is_curve_edit(context)
+        return is_edit(context)
 
     def execute(self, context):
         count = 0
-        for obj in get_edit_curves(context):
+        for obj in get_edit_objects(context):
             group_point_channels(obj)
             cb = get_channelbag(obj.data)
             if cb is None:
                 continue
-            selected = get_selected_point_names(obj)
+            selected = {point_group_name(ci, pi) for ci, pi in get_selected_points(obj)}
 
             # グループの展開・選択(ドープシート/グラフエディタ)
             for group in cb.groups:
@@ -51,8 +40,9 @@ class OjaUtil_OT_CurveFocusSelectedChannels(bpy.types.Operator):
                 count += on
 
             # FCurveの選択と、グラフエディタでの表示
+            lookup = make_lookup(obj)
             for fc in cb.fcurves:
-                if not POINT_PATH_RE.match(fc.data_path):
+                if parse_point_path(obj, fc.data_path, lookup) is None:
                     continue
                 on = fc.group is not None and fc.group.name in selected
                 fc.select = on

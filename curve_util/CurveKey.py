@@ -1,59 +1,17 @@
 import bpy
-import re
-from bpy_extras import anim_utils
+from .CurveData import (
+    CURVE_OBJECT_TYPES, get_edit_objects, is_edit, get_channelbag, group_point_channels,
+    iter_points, point_paths, point_group_name, parse_point_path, make_lookup,
+    get_selected_points, ensure_float_attribute,
+)
 
-# 編集中の(選択中の)Curveのポイント(ベジェはハンドル含む、tilt/radiusも)にキーを打つ
+# 編集中の(選択中の)Curve / Curves のポイントにキーを打つ
+#   Curve : co(ベジェはハンドルも) / tilt / radius
+#   Curves: position / radius / tilt(ベジェはハンドル、NURBSは重みも)
 
-# キーを打つプロパティ
-BEZIER_PROPS = ("co", "handle_left", "handle_right", "tilt", "radius")
-POINT_PROPS = ("co", "tilt", "radius")
-
-# 編集モード中のCurveを取得(マルチオブジェクト編集対応)
-def get_edit_curves(context):
-    if context.mode != 'EDIT_CURVE':
-        return []
-    return [obj for obj in context.view_layer.objects if obj.type == 'CURVE' and obj.mode == 'EDIT']
-
-# Curveの編集モードのみ有効
-def is_curve_edit(context):
-    return len(get_edit_curves(context)) > 0
-
-# チャンネルをポイントごとにグループ化する
-# *****************************************************************************
-POINT_PATH_RE = re.compile(r'^splines\[(\d+)\]\.(?:bezier_points|points)\[(\d+)\]\.')
-
-def point_group_name(spline_index, point_index):
-    return f"S{spline_index} P{point_index}"
-
-def get_channelbag(id_data):
-    ad = id_data.animation_data
-    if ad is None or ad.action is None or ad.action_slot is None:
-        return None
-    return anim_utils.action_get_channelbag_for_slot(ad.action, ad.action_slot)
-
-def group_point_channels(obj):
-    cb = get_channelbag(obj.data)
-    if cb is None:
-        return
-    targets = []
-    for fc in cb.fcurves:
-        m = POINT_PATH_RE.match(fc.data_path)
-        if m:
-            targets.append((fc.data_path, fc.array_index, (int(m[1]), int(m[2]))))
-
-    # グループを番号順に先に全部作る(作成後はFCurveを取り直す必要がある)
-    for key in sorted({t[2] for t in targets}):
-        name = point_group_name(*key)
-        if cb.groups.get(name) is None:
-            group = cb.groups.new(name)
-            group.show_expanded = False
-            group.show_expanded_graph = False
-
-    for data_path, index, key in targets:
-        name = point_group_name(*key)
-        fc = cb.fcurves.find(data_path, index=index)
-        if fc is not None and (fc.group is None or fc.group.name != name):
-            fc.group = cb.groups[name]
+# 互換用(他のモジュールから使われていた名前)
+get_edit_curves = get_edit_objects
+is_curve_edit = is_edit
 
 
 # ポイントにキーを打つ(selected_only=Trueなら選択中のみ)
@@ -61,60 +19,42 @@ def key_points(context, objects, selected_only):
     frame = context.scene.frame_current
     count = 0
     for obj in objects:
-        for spline in obj.data.splines:
-            if spline.type == 'BEZIER':
-                for point in spline.bezier_points:
-                    if selected_only and not (point.select_control_point or point.select_left_handle or point.select_right_handle):
-                        continue
-                    for prop in BEZIER_PROPS:
-                        point.keyframe_insert(prop, frame=frame)
-                    count += 1
-            else:  # NURBS / Poly
-                for point in spline.points:
-                    if selected_only and not point.select:
-                        continue
-                    for prop in POINT_PROPS:
-                        point.keyframe_insert(prop, frame=frame)
-                    count += 1
+        if obj.type == 'CURVES':
+            ensure_float_attribute(obj.data, 'tilt')
+        for ci, pi, kind, selected in list(iter_points(obj)):
+            if selected_only and not selected:
+                continue
+            group = point_group_name(ci, pi)
+            for path in point_paths(obj, ci, pi, kind):
+                obj.data.keyframe_insert(path, frame=frame, group=group)
+            count += 1
         group_point_channels(obj)
     return count
 
-
-# 選択中のポイントのデータパスの先頭を集める
-def get_selected_point_paths(obj):
-    paths = []
-    for si, spline in enumerate(obj.data.splines):
-        if spline.type == 'BEZIER':
-            for pi, point in enumerate(spline.bezier_points):
-                if point.select_control_point or point.select_left_handle or point.select_right_handle:
-                    paths.append(f"splines[{si}].bezier_points[{pi}].")
-        else:
-            for pi, point in enumerate(spline.points):
-                if point.select:
-                    paths.append(f"splines[{si}].points[{pi}].")
-    return paths
 
 # 選択中のポイントの現在フレームのキーを削除する(空になったチャンネルとグループも削除)
 def delete_selected_point_keys(context):
     frame = context.scene.frame_current
     count = 0
-    for obj in get_edit_curves(context):
+    for obj in get_edit_objects(context):
         cb = get_channelbag(obj.data)
         if cb is None:
             continue
-        prefixes = tuple(get_selected_point_paths(obj))
-        if not prefixes:
+        selected = get_selected_points(obj)
+        if not selected:
             continue
+        lookup = make_lookup(obj)
 
         deleted_points = set()
         empty_fcurves = []
         for fc in cb.fcurves:
-            if not fc.data_path.startswith(prefixes):
+            r = parse_point_path(obj, fc.data_path, lookup)
+            if r is None or (r[0], r[1]) not in selected:
                 continue
             for key in reversed(fc.keyframe_points):
                 if abs(key.co.x - frame) < 0.001:
                     fc.keyframe_points.remove(key, fast=True)
-                    deleted_points.add(fc.data_path.rsplit(".", 1)[0])
+                    deleted_points.add((r[0], r[1]))
             if len(fc.keyframe_points) == 0:
                 empty_fcurves.append((fc.data_path, fc.array_index))
             else:
@@ -136,19 +76,19 @@ def delete_selected_point_keys(context):
     return count
 
 
-# 全ポイントキーの対象Curve(編集モード:編集中のCurve / オブジェクトモード:選択中のCurve)
+# 全ポイントキーの対象(編集モード:編集中 / オブジェクトモード:選択中の Curve / Curves)
 def get_all_points_target_curves(context):
-    if context.mode == 'EDIT_CURVE':
-        return get_edit_curves(context)
+    if context.mode in {'EDIT_CURVE', 'EDIT_CURVES'}:
+        return get_edit_objects(context)
     if context.mode == 'OBJECT':
-        return [obj for obj in context.selected_objects if obj.type == 'CURVE']
+        return [obj for obj in context.selected_objects if obj.type in CURVE_OBJECT_TYPES]
     return []
 
 
 class OjaUtil_OT_CurveKeyAllPoints(bpy.types.Operator):
     bl_idname = "ojautil.curve_key_all_points"
     bl_label = "Add Key All Points"
-    bl_description = "編集中(オブジェクトモードでは選択中)の全Curveの全ポイントにキーを打つ"
+    bl_description = "編集中(オブジェクトモードでは選択中)の全Curve/Curvesの全ポイントにキーを打つ"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
@@ -164,15 +104,15 @@ class OjaUtil_OT_CurveKeyAllPoints(bpy.types.Operator):
 class OjaUtil_OT_CurveKeySelectedPoints(bpy.types.Operator):
     bl_idname = "ojautil.curve_key_selected_points"
     bl_label = "Add Key Selected Points"
-    bl_description = "編集中の全Curveの選択中のポイントにキーを打つ"
+    bl_description = "編集中の全Curve/Curvesの選択中のポイントにキーを打つ"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
-        return is_curve_edit(context)
+        return is_edit(context)
 
     def execute(self, context):
-        count = key_points(context, get_edit_curves(context), selected_only=True)
+        count = key_points(context, get_edit_objects(context), selected_only=True)
         if count == 0:
             self.report({'WARNING'}, "No points selected")
             return{'CANCELLED'}
@@ -183,12 +123,12 @@ class OjaUtil_OT_CurveKeySelectedPoints(bpy.types.Operator):
 class OjaUtil_OT_CurveDeleteKeySelectedPoints(bpy.types.Operator):
     bl_idname = "ojautil.curve_delete_key_selected_points"
     bl_label = "Delete Key Selected Points"
-    bl_description = "編集中の全Curveの選択中のポイントから、現在フレームのキーを削除する"
+    bl_description = "編集中の全Curve/Curvesの選択中のポイントから、現在フレームのキーを削除する"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
-        return is_curve_edit(context)
+        return is_edit(context)
 
     def execute(self, context):
         count = delete_selected_point_keys(context)

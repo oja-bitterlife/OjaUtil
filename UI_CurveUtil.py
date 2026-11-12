@@ -24,6 +24,7 @@ class OjaUtil_PT_CurveUtil_ui(bpy.types.Panel):
         col = self.layout.column(align=True)
         col.operator("ojautil.curve_apply_mirror_x", icon='MOD_MIRROR')
         col.operator("ojautil.curve_copy_points_from_active", icon='PASTEDOWN')
+        col.operator("ojautil.curve_copy_animation_from_active", icon='ACTION')
 
 
 # register/unregister
