@@ -279,9 +279,15 @@ def group_point_channels(obj):
 
     for data_path, index, key in targets:
         name = point_group_name(*key)
+        # チャンネルを移すと空になったグループはBlenderが自動で消すので、毎回取り直す
+        group = cb.groups.get(name)
+        if group is None:
+            group = cb.groups.new(name)
+            group.show_expanded = False
+            group.show_expanded_graph = False
         fc = cb.fcurves.find(data_path, index=index)
         if fc is not None and (fc.group is None or fc.group.name != name):
-            fc.group = cb.groups[name]
+            fc.group = cb.groups.get(name)
 
 
 # ポイントの値の読み書き(コピー用)
